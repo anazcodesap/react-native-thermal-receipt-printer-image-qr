@@ -18,6 +18,11 @@ import com.pinmi.react.printer.adapter.PrinterDevice;
 //import com.pinmi.react.printer.adapter.PrinterOption;
 
 import java.util.List;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 /**
  * Created by xiesubin on 2017/9/22.
@@ -38,6 +43,14 @@ public class RNBLEPrinterModule extends ReactContextBaseJavaModule implements RN
     @ReactMethod
     @Override
     public void init(Callback successCallback, Callback errorCallback) {
+         if (ContextCompat.checkSelfPermission(getCurrentActivity(), Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_DENIED)
+        {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            {
+                ActivityCompat.requestPermissions(getCurrentActivity(), new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 2);
+                return;
+            }
+        }
         this.adapter = BLEPrinterAdapter.getInstance();
         this.adapter.init(reactContext, successCallback, errorCallback);
     }
@@ -91,6 +104,14 @@ public class RNBLEPrinterModule extends ReactContextBaseJavaModule implements RN
     @ReactMethod
     public void connectPrinter(String innerAddress, Callback successCallback, Callback errorCallback) {
         adapter.selectDevice(BLEPrinterDeviceId.valueOf(innerAddress), successCallback, errorCallback);
+    }
+
+    @ReactMethod
+    public void printBarCode(String barcodeData, int imageWidth, int imageHeight, Callback errorCallback) {
+        if (this.adapter == null) {
+            this.adapter = BLEPrinterAdapter.getInstance();
+        }
+        this.adapter.printBarcode(barcodeData, imageWidth, imageHeight, errorCallback);
     }
 
     @Override
