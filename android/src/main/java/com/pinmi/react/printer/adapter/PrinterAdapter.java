@@ -30,4 +30,6 @@ public interface PrinterAdapter {
     public void printImageData(String imageUrl, int imageWidth, int imageHeight, Callback errorCallback);
 
     public void printImageBase64(Bitmap imageUrl, int imageWidth, int imageHeight, Callback errorCallback);
+
+    void printBarcode(String barcodeData, int imageWidth, int imageHeight, Callback errorCallback);
 }
