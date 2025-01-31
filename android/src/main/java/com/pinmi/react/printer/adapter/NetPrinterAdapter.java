@@ -1,6 +1,8 @@
 package com.pinmi.react.printer.adapter;
 import static com.pinmi.react.printer.adapter.UtilsImage.getPixelsSlow;
 import static com.pinmi.react.printer.adapter.UtilsImage.recollectSlice;
+import com.pinmi.react.printer.adapter.BarcodeUtils;
+
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -351,4 +353,13 @@ public class NetPrinterAdapter implements PrinterAdapter {
             e.printStackTrace();
         }
     }
+    @Override
+public void printBarcode(String barcodeData, int imageWidth, int imageHeight, Callback errorCallback) {
+    Bitmap barcodeBitmap = BarcodeUtils.generateBarcodeImage(barcodeData, imageWidth, imageHeight);
+    if (barcodeBitmap == null) {
+        errorCallback.invoke("Failed to generate barcode image");
+        return;
+    }
+    printImageBase64(barcodeBitmap, imageWidth, imageHeight, errorCallback);
+}
 }
