@@ -25,6 +25,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import android.graphics.BitmapFactory;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.client.j2se.MatrixToImageWriter; // Correct import
+import java.util.HashMap;
+import java.util.Map;
 /**
  * Created by xiesubin on 2017/9/21.
  */
@@ -324,5 +333,45 @@ public class BLEPrinterAdapter implements PrinterAdapter{
             Log.e(LOG_TAG, "failed to print data");
             e.printStackTrace();
         }
+    }
+
+    // Method to generate a barcode image
+  private Bitmap generateBarcodeImage(String barcodeData, int width, int height) {
+    try {
+        Map<EncodeHintType, Object> hints = new HashMap<>();
+        hints.put(EncodeHintType.MARGIN, 0); // No margin
+        BitMatrix bitMatrix = new QRCodeWriter().encode(
+            barcodeData,
+            BarcodeFormat.CODE_128, // Use CODE_128 for barcodes
+            width,
+            height,
+            hints
+        );
+
+        // Convert BitMatrix to Bitmap
+        int[] pixels = new int[width * height];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                pixels[y * width + x] = bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE;
+            }
+        }
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
+        return bitmap;
+    } catch (WriterException e) {
+        e.printStackTrace();
+        return null;
+    }
+}
+
+    // Method to print barcode
+    @Override
+    public void printBarcode(String barcodeData, int imageWidth, int imageHeight, Callback errorCallback) {
+        Bitmap barcodeBitmap = BarcodeUtils.generateBarcodeImage(barcodeData, imageWidth, imageHeight);
+        if (barcodeBitmap == null) {
+            errorCallback.invoke("Failed to generate barcode image");
+            return;
+        }
+        printImageBase64(barcodeBitmap, imageWidth, imageHeight, errorCallback);
     }
 }
